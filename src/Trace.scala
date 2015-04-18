@@ -1,3 +1,11 @@
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
+
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+
 object Trace {
 
   val AntiAliasingFactor = 4
@@ -27,20 +35,12 @@ object Trace {
   }
 
   def render(scene: Scene, outfile: String, width: Int, height: Int) = {
-    
     val image = new Image(width, height)
-
-    // Init the coordinator -- must be done before starting it.
-    Coordinator.init(image, outfile)
-
-    // TODO: Start the Coordinator actor.
-
-    scene.traceImage(width, height)
-
-    // TODO:
-    // This one is tricky--we can't simply send a message here to print
-    // the image, since the actors started by traceImage haven't necessarily
-    // finished yet.  Maybe print should be called elsewhere?
-    Coordinator.print
+    val system = ActorSystem("TracerSystem")
+    val coordinator = system.actorOf(Props(new Coordinator(image, outfile)), "coordinator")
+    implicit val timeout = Timeout(30 seconds)
+    val future = coordinator ? RenderScene(scene, width, height)
+    val result = Await.result(future, timeout.duration).asInstanceOf[String]
+    system.shutdown()
   }
 }

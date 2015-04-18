@@ -1,7 +1,14 @@
+import java.io.FileReader
+import java.io.LineNumberReader
+import scala.annotation.tailrec
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+import akka.actor.ActorContext
+import akka.actor.Props
+
 object Scene {
 
-  import java.io.{FileReader, LineNumberReader}
-
+  import java.io.{ FileReader, LineNumberReader }
   import scala.annotation.tailrec
 
   def fromFile(file: String) = {
@@ -19,8 +26,7 @@ object Scene {
         case (_, Nil) => throw new RuntimeException("no lights")
         case (os, ls) => (os.reverse, ls.reverse)
       }
-    }
-    else {
+    } else {
       val fields = line.replaceAll("#.*", "").trim.split("\\s+").filter(_ != "")
       fields.headOption match {
         case Some("sphere") =>
@@ -39,20 +45,23 @@ object Scene {
   }
 }
 
-class Scene private(val objects: List[Shape], val lights: List[Light]) {
+class Scene private (val objects: List[Shape], val lights: List[Light]) {
 
   private def this(p: (List[Shape], List[Light])) = this(p._1, p._2)
 
   /** Level of background lighting. */
   val ambient = .8f
+
   /** Image background colour. */
   val background = Colour.black
 
+  /** Viewing point */
   val eye = Vector.origin
-  val angle = 90f // viewing angle
-  //val angle = 180f // fisheye
 
-  def traceImage(width: Int, height: Int) {
+  /** Viewing angle **/
+  val angle = 90f
+
+  def traceImage(width: Int, height: Int, context: ActorContext, coordinator: ActorRef) {
 
     val frustum = (.5 * angle * math.Pi / 180).toFloat
 
@@ -74,8 +83,11 @@ class Scene private(val objects: List[Shape], val lights: List[Light]) {
         // This loop body can be sequential.
         var colour = Colour.black
 
+        context.actorOf(Props[Tracer], "TracerActor-" + x + "-" + y) ! RenderLine(this, x, y, sinf, cosf, coordinator)
+        
         for (dx <- 0 until ss) {
           for (dy <- 0 until ss) {
+
 
             // Create a vector to the pixel on the view plane formed when
             // the eye is at the origin and the normal is the Z-axis.
@@ -94,7 +106,7 @@ class Scene private(val objects: List[Shape], val lights: List[Light]) {
         if (Vector(colour.r, colour.g, colour.b).norm > 1)
           Trace.lightCount += 1
 
-        Coordinator.set(x, y, colour)
+        coordinator ! SetPixel(x, y, colour)
       }
     }
   }
@@ -139,11 +151,9 @@ class Scene private(val objects: List[Shape], val lights: List[Light]) {
         if (power > 1e-12) {
           val scale = o.reflect * power
           l.colour * o.specular * scale
-        }
-        else
+        } else
           Colour.black
-      }
-      else
+      } else
         Colour.black
 
       println("specular " + specular)
@@ -159,7 +169,7 @@ class Scene private(val objects: List[Shape], val lights: List[Light]) {
   def reflected(v: Vector, N: Vector): Vector = v - (N * 2.0f * (v dot N))
 
   def intersections(ray: Ray) = objects.flatMap {
-    o => o.intersect(ray).map { v => (v, o)}
+    o => o.intersect(ray).map { v => (v, o) }
   }
 
   def closestIntersection(ray: Ray) = intersections(ray).sortWith {
