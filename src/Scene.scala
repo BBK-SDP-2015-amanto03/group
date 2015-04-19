@@ -61,7 +61,21 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
   /** Viewing angle **/
   val angle = 90f
 
+  // Version Two
   def traceImage(width: Int, height: Int, context: ActorContext, coordinator: ActorRef) {
+      
+    val frustum = (.5 * angle * math.Pi / 180).toFloat
+    val cosf = math.cos(frustum)
+    val sinf = math.sin(frustum)
+
+    for (line <- 0 until height) {
+      context.actorOf(Props[Tracer], "TracerActor-" + line) ! RenderLine(this, line, width, height, sinf, cosf, coordinator)
+    }
+    
+  }
+
+  // Version One
+  def traceImage(width: Int, height: Int, coordinator: ActorRef) {
 
     val frustum = (.5 * angle * math.Pi / 180).toFloat
 
@@ -83,11 +97,8 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
         // This loop body can be sequential.
         var colour = Colour.black
 
-        context.actorOf(Props[Tracer], "TracerActor-" + x + "-" + y) ! RenderLine(this, x, y, sinf, cosf, coordinator)
-        
         for (dx <- 0 until ss) {
           for (dy <- 0 until ss) {
-
 
             // Create a vector to the pixel on the view plane formed when
             // the eye is at the origin and the normal is the Z-axis.
@@ -107,6 +118,7 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
           Trace.lightCount += 1
 
         coordinator ! SetPixel(x, y, colour)
+        
       }
     }
   }
