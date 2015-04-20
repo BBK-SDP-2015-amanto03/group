@@ -19,12 +19,6 @@ class Coordinator(image: Image, outfile: String) extends Actor {
   // Who asked us to start rendering?
   private var renderRequester: Option[ActorRef] = None
 
-  // TODO: make set a message
-  def set(x: Int, y: Int, c: Colour) = {
-    image(x, y) = c
-    waiting -= 1
-  }
-
   def print = {
     assert(waiting == 0)
     image.print(outfile)
@@ -48,6 +42,8 @@ class Coordinator(image: Image, outfile: String) extends Actor {
         println("Render finished")
         renderRequester.map(_ ! "Done")
       }
+    case _ => 
+      println("I dont't know about this message.")
   }
 
 }
