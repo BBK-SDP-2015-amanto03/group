@@ -1,15 +1,17 @@
 import akka.actor.Actor
 import akka.actor.ActorRef
 
-case class RenderLine(scene: Scene, line: Int, width: Int, height: Int, sinf: Double, cosf: Double, coordinator: ActorRef)
+case class RenderLine(scene: Scene, line: Int, width: Int, height: Int, frustum: Double, coordinator: ActorRef)
 
 class Tracer() extends Actor {
   
   def receive = {
     
-    case RenderLine(scene, line, width, height, sinf, cosf, coordinator) => {
+    case RenderLine(scene, line, width, height, frustum, coordinator) => {
 
-      val ss = Trace.AntiAliasingFactor
+    val cosf = math.cos(frustum)
+    val sinf = math.sin(frustum)
+    val ss = Trace.AntiAliasingFactor
 
       for (x <- 0 until width) {
         var colour = Colour.black
@@ -34,6 +36,7 @@ class Tracer() extends Actor {
           Trace.lightCount += 1
 
         coordinator ! SetPixel(x, line, colour)
+        
       }
 
     }
