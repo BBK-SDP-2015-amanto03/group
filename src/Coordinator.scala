@@ -13,8 +13,6 @@ object Messages {
 
 class Coordinator(image: Image, outfile: String) extends Actor {
 
-  import Messages._
-  
   // Number of pixels we're waiting for to be set.
   private var waiting = image.width * image.height
   
@@ -24,11 +22,14 @@ class Coordinator(image: Image, outfile: String) extends Actor {
   // Who asked us to start rendering?
   private var renderRequester: Option[ActorRef] = None
 
+  // Print the image file
   def print = {
     assert(waiting == 0)
     image.print(outfile)
   }
 
+  import Messages._
+  
   override def receive = {
     case RenderScene(scene, width, height) =>
       if (running) {
@@ -44,8 +45,7 @@ class Coordinator(image: Image, outfile: String) extends Actor {
       waiting -= 1
       if (waiting == 0) {
         print
-        println("Render finished")
-        renderRequester.map(_ ! "Done")
+        renderRequester.map(_ ! "Render finished")
       }
     case unexpected => 
       println(s"ERROR: Unknown message ${unexpected}.")

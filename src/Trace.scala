@@ -42,7 +42,8 @@ object Trace {
     val coordinator = system.actorOf(Props(new Coordinator(image, outfile)), "coordinator")
     implicit val timeout = Timeout(30 seconds)
     val future = coordinator ? RenderScene(scene, width, height)
-    val result = Await.result(future, timeout.duration).asInstanceOf[String]
+    val result = Await.result(future, timeout.duration)
+    println(result)
     system.shutdown()
   }
 }
