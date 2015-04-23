@@ -25,25 +25,27 @@ object Trace {
 
     val (infile, outfile) = (args(0), args(1))
     val scene = Scene.fromFile(infile)
-
     render(scene, outfile, Width, Height)
 
-    println("rays cast " + rayCount)
-    println("rays hit " + hitCount)
-    println("light " + lightCount)
-    println("dark " + darkCount)
   }
   
   import Messages._
 
   def render(scene: Scene, outfile: String, width: Int, height: Int) = {
+    
     val image = new Image(width, height)
     val system = ActorSystem("TracerSystem")
     val coordinator = system.actorOf(Props(new Coordinator(image, outfile)), "coordinator")
     implicit val timeout = Timeout(30 seconds)
     val future = coordinator ? RenderScene(scene, width, height)
     val result = Await.result(future, timeout.duration)
+    
+    println(f"\t$rayCount%,d rays cast")
+    println(f"\t$hitCount%,d rays hit")
+    println(f"\t$lightCount%,d light")
+    println(f"\t$darkCount%,d dark")    
     println(result)
     system.shutdown()
+    
   }
 }

@@ -151,6 +151,7 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
   def trace(ray: Ray): Colour = trace(ray, maxDepth)
 
   private def trace(ray: Ray, depth: Int): Colour = {
+    
     Trace.rayCount += 1
 
     // Compute the intersections of the ray with every object, sort by
