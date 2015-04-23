@@ -5,11 +5,16 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.actorRef2Scala
 
-case class RenderScene(scene: Scene, width: Int, height: Int)
-case class SetPixel(x: Int, y: Int, colour: Colour)
+object Messages {
+  case class RenderScene(scene: Scene, width: Int, height: Int)
+  case class SetPixel(x: Int, y: Int, colour: Colour)
+  case class RenderLine(scene: Scene, line: Int, width: Int, height: Int, frustum: Double, coordinator: ActorRef)
+}
 
 class Coordinator(image: Image, outfile: String) extends Actor {
 
+  import Messages._
+  
   // Number of pixels we're waiting for to be set.
   private var waiting = image.width * image.height
   
@@ -42,8 +47,8 @@ class Coordinator(image: Image, outfile: String) extends Actor {
         println("Render finished")
         renderRequester.map(_ ! "Done")
       }
-    case _ => 
-      println("I dont't know about this message.")
+    case unexpected => 
+      println(s"ERROR: Unknown message ${unexpected}.")
   }
 
 }

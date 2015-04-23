@@ -33,6 +33,8 @@ object Trace {
     println("light " + lightCount)
     println("dark " + darkCount)
   }
+  
+  import Messages._
 
   def render(scene: Scene, outfile: String, width: Int, height: Int) = {
     val image = new Image(width, height)
