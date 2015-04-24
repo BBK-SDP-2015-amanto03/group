@@ -12,10 +12,10 @@ object Trace {
   val Width = 800
   val Height = 600
 
-  private var rayCount = new AtomicInteger(0)
-  private var hitCount = new AtomicInteger(0)
-  private var lightCount = new AtomicInteger(0)
-  private var darkCount = new AtomicInteger(0)
+  private val rayCount = new AtomicInteger(0)
+  private val hitCount = new AtomicInteger(0)
+  private val lightCount = new AtomicInteger(0)
+  private val darkCount = new AtomicInteger(0)
   
   def incrementRayCount = rayCount.getAndIncrement
   def incrementHitCount = hitCount.getAndIncrement
