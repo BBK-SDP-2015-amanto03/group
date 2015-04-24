@@ -152,7 +152,7 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
 
   private def trace(ray: Ray, depth: Int): Colour = {
     
-    Trace.rayCount += 1
+    Trace.rayCount.getAndIncrement
 
     // Compute the intersections of the ray with every object, sort by
     // distance from the ray's origin and pick the closest to the origin.
@@ -166,7 +166,7 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
       case Some((v, o)) => {
         // Compute the color as the sum of:
 
-        Trace.hitCount += 1
+        Trace.hitCount.getAndIncrement
 
         // The contribution of each point light source.
         var c = lights.foldLeft(Colour.black) {

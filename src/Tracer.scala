@@ -31,9 +31,9 @@ class Tracer() extends Actor {
         }
 
         if (Vector(colour.r, colour.g, colour.b).norm < 1)
-          Trace.darkCount += 1
+          Trace.darkCount.getAndIncrement
         if (Vector(colour.r, colour.g, colour.b).norm > 1)
-          Trace.lightCount += 1
+          Trace.lightCount.getAndIncrement
 
         coordinator ! SetPixel(x, line, colour)
         

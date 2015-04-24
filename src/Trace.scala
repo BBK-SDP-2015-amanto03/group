@@ -1,6 +1,6 @@
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
-
+import java.util.concurrent.atomic.AtomicInteger
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask
@@ -12,10 +12,11 @@ object Trace {
   val Width = 800
   val Height = 600
 
-  var rayCount = 0
-  var hitCount = 0
-  var lightCount = 0
-  var darkCount = 0
+  
+  var rayCount = new AtomicInteger(0)
+  var hitCount = new AtomicInteger(0)
+  var lightCount = new AtomicInteger(0)
+  var darkCount = new AtomicInteger(0)
 
   def main(args: Array[String]): Unit = {
     if (args.length != 2) {
@@ -40,10 +41,10 @@ object Trace {
     val future = coordinator ? RenderScene(scene, width, height)
     val result = Await.result(future, timeout.duration)
     
-    println(f"\t$rayCount%,d rays cast")
-    println(f"\t$hitCount%,d rays hit")
-    println(f"\t$lightCount%,d light")
-    println(f"\t$darkCount%,d dark")    
+    println(f"Rays Cast  = ${rayCount.get()}%,d")
+    println(f"Rays Hast  = ${hitCount.get()}%,d")
+    println(f"Light      = ${lightCount.get()}%,d")
+    println(f"Dark       = ${darkCount.get()}%,d")
     println(result)
     system.shutdown()
     
