@@ -5,8 +5,11 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.actorRef2Scala
 
-case class RenderScene(scene: Scene, width: Int, height: Int)
-case class SetPixel(x: Int, y: Int, colour: Colour)
+object Messages {
+  case class RenderScene(scene: Scene, width: Int, height: Int)
+  case class SetPixel(x: Int, y: Int, colour: Colour)
+  case class RenderLine(scene: Scene, line: Int, width: Int, height: Int, frustum: Double, coordinator: ActorRef)
+}
 
 class Coordinator(image: Image, outfile: String) extends Actor {
 
@@ -19,11 +22,14 @@ class Coordinator(image: Image, outfile: String) extends Actor {
   // Who asked us to start rendering?
   private var renderRequester: Option[ActorRef] = None
 
+  // Print the image file
   def print = {
     assert(waiting == 0)
     image.print(outfile)
   }
 
+  import Messages._
+  
   override def receive = {
     case RenderScene(scene, width, height) =>
       if (running) {
@@ -39,11 +45,10 @@ class Coordinator(image: Image, outfile: String) extends Actor {
       waiting -= 1
       if (waiting == 0) {
         print
-        println("Render finished")
-        renderRequester.map(_ ! "Done")
+        renderRequester.map(_ ! "Render finished")
       }
-    case _ => 
-      println("I dont't know about this message.")
+    case unexpected => 
+      println(s"ERROR: Unknown message ${unexpected}.")
   }
 
 }

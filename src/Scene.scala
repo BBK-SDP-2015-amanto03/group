@@ -61,15 +61,16 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
   /** Viewing angle **/
   val angle = 90f
 
-  // Version Two
   def traceImage(width: Int, height: Int, context: ActorContext, coordinator: ActorRef) {
       
+    import Messages.RenderLine
+    
     val frustum = (.5 * angle * math.Pi / 180).toFloat
     val cosf = math.cos(frustum)
     val sinf = math.sin(frustum)
 
     for (line <- 0 until height) {
-      context.actorOf(Props[Tracer], "TracerActor-" + line) ! RenderLine(this, line, width, height, frustum, coordinator)
+      context.actorOf(Props[Tracer], s"TracerActor-${line}") ! RenderLine(this, line, width, height, frustum, coordinator)
     }
     
   }
@@ -84,7 +85,7 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
     false
   }
 
-  // Compute the color contributed by light l at point v on object o.
+  // Compute the colour contributed by light l at point v on object o.
   def shade(ray: Ray, l: Light, v: Vector, o: Shape): Colour = {
     val toLight = Ray(v, (l.loc - v).normalized)
 
@@ -145,9 +146,12 @@ class Scene private (val objects: List[Shape], val lights: List[Light]) {
 
   val maxDepth = 3
 
+  def trace(vector: Vector): Colour = trace(Ray(eye, vector), maxDepth)
+  
   def trace(ray: Ray): Colour = trace(ray, maxDepth)
 
   private def trace(ray: Ray, depth: Int): Colour = {
+    
     Trace.rayCount += 1
 
     // Compute the intersections of the ray with every object, sort by

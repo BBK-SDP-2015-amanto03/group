@@ -1,13 +1,13 @@
 import akka.actor.Actor
 import akka.actor.ActorRef
 
-case class RenderLine(scene: Scene, line: Int, width: Int, height: Int, frustum: Double, coordinator: ActorRef)
-
 class Tracer() extends Actor {
   
+  import Messages._
+
   def receive = {
     
-    case RenderLine(scene, line, width, height, frustum, coordinator) => {
+    case RenderLine(scene, line, width, height, frustum, coordinator) => 
 
     val cosf = math.cos(frustum)
     val sinf = math.sin(frustum)
@@ -25,7 +25,7 @@ class Tracer() extends Actor {
               (sinf * 2 * (height.toFloat / width) * (.5 - (line + dy.toFloat / ss) / height)).toFloat,
               cosf.toFloat).normalized
 
-            val c = scene.trace(Ray(scene.eye, dir)) / (ss * ss)
+            val c = scene.trace(dir) / (ss * ss)
             colour += c
           }
         }
@@ -39,13 +39,9 @@ class Tracer() extends Actor {
         
       }
 
-    }
-    case _ => {
-      println("I dont't know about this message.")
-    }
+    case unexpected => 
+      println(s"ERROR: Unknown message ${unexpected}.")
+
   }
-  
-  
-  
   
 }
