@@ -2,3 +2,6 @@
 /lib/
 /ide/
 /*.pdf
+.cache
+.classpath
+.project
