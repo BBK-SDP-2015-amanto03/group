@@ -1,10 +1,13 @@
 import java.io.FileReader
 import java.io.LineNumberReader
+
 import scala.annotation.tailrec
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
+
+import Messages.RenderLine
 import akka.actor.ActorContext
+import akka.actor.ActorRef
 import akka.actor.Props
+import akka.actor.actorRef2Scala
 
 object Scene {
 

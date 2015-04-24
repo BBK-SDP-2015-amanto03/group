@@ -1,6 +1,9 @@
+import java.util.concurrent.atomic.AtomicInteger
+
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
-import java.util.concurrent.atomic.AtomicInteger
+
+import Messages.RenderScene
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask

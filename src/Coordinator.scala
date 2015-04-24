@@ -1,6 +1,3 @@
-import scala.annotation.elidable
-import scala.annotation.elidable.ASSERTION
-
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.actorRef2Scala
