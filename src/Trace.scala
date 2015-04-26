@@ -38,6 +38,7 @@ object Trace {
   }
   
   import Messages._
+  import scala.language.postfixOps
 
   def render(scene: Scene, outfile: String, width: Int, height: Int) = {
     
